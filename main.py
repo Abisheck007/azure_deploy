@@ -3,8 +3,9 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+from api import admin, bookings, destinations, flights, users
 from database import db_connection
-from api import users, destinations, flights, weather, bookings, admin
+from api import weather
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

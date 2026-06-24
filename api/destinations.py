@@ -6,7 +6,8 @@ import copy
 import random
 import config
 from database import db_connection
-from services import itinerary_service, recommendation_engine
+from services import recommendation_engine
+from services import itinerary_service
 from utils.rate_limiter import rate_limit_dependency
 from services import audit_service
 from api import users
