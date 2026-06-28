@@ -98,39 +98,19 @@ def init_db():
     with open(schema_path, "r") as f:
         schema_sql = f.read()
         
-    conn, is_sqlite = get_connection()
+    conn = get_connection()
     cursor = conn.cursor()
     
-    # MySQL server database creation check
-    if not is_sqlite and config.DB_TYPE == "mysql":
-        try:
-            # Reconnect without specifying database first, to ensure it exists
-            temp_conn = mysql.connector.connect(
-                host=config.MYSQL_HOST,
-                user=config.MYSQL_USER,
-                password=config.MYSQL_PASSWORD
-            )
-            temp_cursor = temp_conn.cursor()
-            temp_cursor.execute(f"CREATE DATABASE IF NOT EXISTS {config.MYSQL_DATABASE}")
-            temp_cursor.close()
-            temp_conn.close()
-        except Exception as e:
-            logger.warning(f"Could not create database via MySQL: {e}")
+   
             
-    # For SQLite, we need to adapt schema.sql (remove engine declarations, auto_increment syntax)
+  
     statements = schema_sql.split(";")
     
     for statement in statements:
         statement = statement.strip()
         if not statement:
             continue
-            
-        if is_sqlite:
-            # Modify SQL statements to be SQLite compatible
-            statement = statement.replace("AUTO_INCREMENT", "")
-            # SQLite doesn't need to specify ENGINE/charset
-            if "ENGINE=" in statement:
-                statement = statement.split("ENGINE=")[0]
+        
                 
         try:
             cursor.execute(statement)

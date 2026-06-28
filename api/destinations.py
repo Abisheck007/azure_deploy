@@ -195,11 +195,13 @@ def search_destination(request: Request, city: str = Query(..., description="Cit
     if dest:
         dest_data = dest[0]
         # Query cached tourist places using RANDOM to change every time
-        _, is_sqlite = db_connection.get_connection()
-        random_func = "RANDOM()" if is_sqlite else "RAND()"
-        
         places = db_connection.execute_read(
-            f"SELECT * FROM tourist_places WHERE destination_id = ? ORDER BY {random_func} LIMIT 8",
+            """
+            SELECT TOP 8 *
+            FROM tourist_places
+            WHERE destination_id = ?
+            ORDER BY NEWID()
+            """,
             (dest_data["destination_id"],)
         )
         dest_data["places"] = places

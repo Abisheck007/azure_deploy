@@ -9,12 +9,15 @@ def generate_day_wise_itinerary(destination_id: int, days: int = 3):
     - Evening: Beaches, Parks & Adventures
     """
     # Fetch tourist places from DB using randomized query
-    random_func = "RAND()"
-
     places = db_connection.execute_read(
-        f"SELECT * FROM tourist_places WHERE destination_id = ? ORDER BY {random_func}",
-        (destination_id,)
-    )
+    """
+    SELECT *
+    FROM tourist_places
+    WHERE destination_id = ?
+    ORDER BY NEWID()
+    """,
+    (destination_id,)
+)
     
     if not places:
         return []
