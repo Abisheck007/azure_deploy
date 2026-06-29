@@ -19,10 +19,18 @@ def log_action(user_id: int, action: str, ip_address: str, status: str, details:
     try:
         db_connection.execute_query(
             """
-            INSERT INTO audit_logs (user_id, action, ip_address, timestamp, status, details) 
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO audit_logs
+            (user_id, action, ip_address, timestamp, status, details)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (user_id, action, ip_address, timestamp, status, sanitized_details)
+            (
+                user_id,
+                action,
+                ip_address,
+                timestamp,
+                status,
+                sanitized_details,
+            )
         )
         logger.info(f"Audit Logged: {action} | User: {user_id} | Status: {status} | IP: {ip_address}")
     except Exception as e:

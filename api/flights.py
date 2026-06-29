@@ -103,7 +103,7 @@ def fetch_aviationstack_flights(source: str, destination: str, date_str: str, cl
                 "arrival_time": arr_time,
                 "price": price
             })
-        return flights
+        return flights  
     except Exception as e:
         logger.error(f"Error calling Aviationstack API: {e}")
         return []

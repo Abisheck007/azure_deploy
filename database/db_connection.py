@@ -29,31 +29,43 @@ def execute_query(query, params=None):
     cursor = conn.cursor()
 
     try:
+        is_insert = query.strip().upper().startswith("INSERT")
+
+        if is_insert:
+            query += "; SELECT SCOPE_IDENTITY() AS id"
+
         if params:
             cursor.execute(query, params)
         else:
             cursor.execute(query)
 
-        conn.commit()
+        inserted_id = None
 
-        try:
-            cursor.execute("SELECT @@IDENTITY")
-            last_row_id = cursor.fetchone()[0]
-        except:
-            last_row_id = None
+        if is_insert:
+            while True:
+                if cursor.description:
+                    row = cursor.fetchone()
+                    if row:
+                        inserted_id = int(row[0])
+                    break
+
+                if not cursor.nextset():
+                    break
+
+        conn.commit()
 
         cursor.close()
         conn.close()
 
-        return last_row_id
+        return inserted_id
 
     except Exception as e:
         conn.rollback()
         cursor.close()
         conn.close()
         logger.error(f"Error executing query: {e}")
-        raise e
-    
+        raise
+        
 
 def execute_read(query, params=None):
     conn = get_connection()
@@ -104,19 +116,18 @@ def init_db():
    
             
   
-    statements = schema_sql.split(";")
-    
+    statements = [
+        stmt.strip()
+        for stmt in schema_sql.split(";")
+        if stmt.strip()
+    ]
+
     for statement in statements:
-        statement = statement.strip()
-        if not statement:
-            continue
-        
-                
         try:
             cursor.execute(statement)
-        except Exception as e:
-            # For SQLite, ignore errors on things it doesn't fully support or if they exist
-            logger.error(f"Failed to execute schema statement: {statement}. Error: {e}")
+        except pyodbc.Error as e:
+            logger.error(f"Failed:\n{statement}\n{e}")
+            raise
             
     conn.commit()
     cursor.close()

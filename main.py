@@ -40,7 +40,16 @@ async def add_security_headers(request: Request, call_next):
 # Initialize  mysql db on startup(Abi)
 @app.on_event("startup")
 def startup_event():
-    logger.info("Azure SQL connection ready")
+    try:
+        logger.info("Connecting to Azure SQL...")
+
+        db_connection.init_db()
+
+        logger.info("Database initialized successfully.")
+
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        raise
 
 # Include API routers
 app.include_router(users.router)
